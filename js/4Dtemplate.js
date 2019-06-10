@@ -1707,6 +1707,9 @@ function makeTorus4D( n, isFront ) {
 			);
     }
 
+    //
+    // make the actual geometry 
+    //
     var geometry = new THREE.Geometry();
     geometry.vertices4D = vertices4D;
 	geometry.vertices = from4Dto3D(vertices4D, g_modelMatrix4D.m.elements);
