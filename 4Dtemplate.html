@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Demo Viewer</title>
+		<meta charset="utf-8">
+
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+		<style>
+			body {
+				display: none;
+				font-family: Monospace;
+				background-color: #fff;
+				color: #fff;
+				margin: 0px;
+				overflow: scroll;
+			}
+			input[type='radio'] {
+			    
+			}
+			#info {
+				color: #fff;
+				position: absolute;
+				top: 10px;
+				width: 100%;
+				text-align: center;
+				z-index: 100;
+				display:block;
+			}
+			#info a, .button { 
+				color: #f00; 
+				font-weight: bold; 
+				text-decoration: underline; 
+				cursor: pointer 
+			}
+			#mobile-controls {
+				width: 100%;
+				/*text-align: right;*/
+				padding-left: 10px;
+				padding-right: 10px;
+			}
+			.btn {
+			  padding: 5px !important;
+			}
+			.settings {
+				padding-left: 2px !important;
+			}
+			#settings-close-btn {
+				font-size: 14px;
+				float: right;
+			}
+			#settings-title {
+				font-size: 20px;
+				text-align: center;
+			}
+		</style>
+
+		<link type="text/css" rel="stylesheet" href="styles/bootstrap-v3.3.7.min.css">
+		<link type="text/css" rel="stylesheet" href="styles/4Dtemplate.css">
+	</head>
+
+	<body>
+		<div class="padding">
+			<h1>4D Template</h1>
+		</div>
+
+		<div class="padding" id="webgl-container"></div>
+		<div class="mobile" id="mobile-controls">
+			<input type="radio" name="interaction-mode" value="three" checked="checked">&nbsp; 3D &nbsp;&nbsp;
+			<input type="radio" name="interaction-mode" value="xw-yw">&nbsp; XW/YW &nbsp;&nbsp;
+			<input type="radio" name="interaction-mode" value="fixed-z">&nbsp; ZW &nbsp;&nbsp;
+			<button id="settings-btn" class="mobile-btn" style="cursor:pointer; float:right;">
+				Settings
+			</button>
+		</div>
+
+		<div id="debug"></div>
+
+		<div id="controls" class="padding">
+			<div class="min225">
+				<span class="mobile" id="settings-title"><strong>Settings</strong></span>
+				<button  class="mobile" id="settings-close-btn"><span>x</span></button>
+				<hr class="mobile">
+				<table>
+					<tbody>
+						<tr>
+							<td>
+								<strong>Rotation Speed:</strong>
+							</td>
+							<td>
+								<div class="slidercontainer">
+									<input type="range" min="50" max="150" value="100" class="slider" id="rotation-slider">
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<strong>Momentum:</strong>
+							</td>
+							<td>
+								<input type="checkbox" id="momentum">
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<hr>
+
+			<div class="min225">
+				<table>
+					<tbody>
+						<tr>
+							<td>
+								<strong>Geometry:</strong>
+							</td>
+							<td>
+								<select id="geometry-dropdown">
+									<option value="none">None</option>
+									<option value="torus4D">4D Torus</option>
+									<option value="cube">Cube</option>
+									<option value="steiner">Steiner</option>
+									<option value="one-side-torus4D">One Sided Torus</option>
+									<option value="calabi-yau">Fermat Surface</option>
+									<!-- <option value="C5">C₅</option> -->
+								</select>
+							</td>
+						</tr>
+						<tr id="subdivisions-tr" hidden>
+							<td>
+								<strong>Subdivisions:</strong>
+							</td>
+							<td>
+								<div class="slidercontainer">
+									<input type="range" min="1" max="50" value="20" class="slider" id="subdivisions-slider">
+								</div>
+							</td>
+						</tr>
+						<tr id="calabi-yau-n-tr" hidden>
+							<td>
+								<strong>N:</strong>
+							</td>
+							<td>
+								<select id="calabi-yau-n-dropdown">
+									<option value="1">1</option>
+									<option value="2" selected="">2</option>
+									<option value="3">3</option>
+									<option value="4">4</option>
+									<option value="5">5</option>
+									<option value="6">6</option>
+									<option value="7">7</option>
+									<option value="8">8</option>
+								</select>
+							</td>
+						</tr>
+						<tr id="calabi-yau-ximax-tr" hidden>
+							<td>
+								<strong>ximax:</strong>
+							</td>
+							<td>
+								<div class="slidercontainer">
+									<input type="range" min="1" max="200" value="100" class="slider" id="ximax-slider">
+								</div>
+							</td>
+						</tr>
+						<tr id="calabi-yau-xiN-tr" hidden>
+							<td>
+								<strong>xiN:</strong>
+							</td>
+							<td>
+								<div class="slidercontainer">
+									<input type="range" min="1" max="9" value="3" class="slider" id="xiN-slider">
+								</div>
+							</td>
+						</tr>
+						<tr id="calabi-yau-thetaN-tr" hidden>
+							<td>
+								<strong>thetaN:</strong>
+							</td>
+							<td>
+								<div class="slidercontainer">
+									<input type="range" min="1" max="50" value="7" class="slider" id="thetaN-slider">
+								</div>
+							</td>
+						</tr>
+						<tr id="upload" class="desktop">
+							<td>
+								<strong>File Upload:</strong>
+							</td>
+							<td>
+								<input type="file" class="file-upload" id="model-upload">
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<hr>
+
+			<div class="min225">
+				<table id="keys-table-mobile" class="test-collapse">
+					<tbody>
+						<tr class="desktop">
+							<td colspan="2">
+								<button type="button" id="reset-4D-button" style="cursor:pointer;">Reset 4D transformations</button>
+							</td>
+						</tr>
+						<tr class="desktop">
+							<td colspan="2">
+								<button id="reset-3D-button" style="cursor:pointer;">Reset 3D transformations</button>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<input type="checkbox" id="frame-axes-toggle">
+							</td>
+							<td>
+								toggle viewing frame axes
+							</td>
+							<td class="desktop-shortcut" style="display: none;">
+								'<strong>a</strong>'
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<input type="checkbox" id="4D-axes-toggle">
+							</td>
+							<td>
+								toggle viewing 4D axes
+							</td>
+							<td class="desktop-shortcut" style="display: none;">
+								'<strong>A</strong>'
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<input type="checkbox" id="wireframe-toggle">
+							</td>
+							<td>
+								render edges
+							</td>
+							<td class="desktop-shortcut" style="display: none;">
+								'<strong>e</strong>'
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<input type="checkbox" id="points-toggle">
+							</td>
+							<td>
+								render vertices
+							</td>
+							<td class="desktop-shortcut" style="display: none;">
+								'<strong>v</strong>'
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<input type="checkbox" id="faces-toggle">
+							</td>
+							<td>
+								render faces
+							</td>
+							<td class="desktop-shortcut" style="display: none;">
+								'<strong>f</strong>'
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<input type="checkbox" id="shading-toggle">
+							</td>
+							<td>
+								smooth shading
+							</td>
+							<td class="desktop-shortcut" style="display: none;">
+								'<strong>s</strong>'
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<input type="checkbox" id="4D-perspective-toggle">
+							</td>
+							<td>
+								toggle 4D orthographic/perspective
+							</td>
+							<td class="desktop-shortcut" style="display: none;">
+								'<strong>0</strong>'
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<input type="radio" name="projection-start" value="x"> X<br>
+								<input type="radio" name="projection-start" value="y"> Y<br>
+								<input type="radio" name="projection-start" value="z"> Z<br>
+								<input type="radio" name="projection-start" value="w" checked="checked"> W
+							</td>
+							<td>
+								4D projection
+							</td>
+						</tr>
+						<tr class="desktop">
+							<td>
+								<input type="checkbox" id="z-4D-rot-toggle">
+							</td>
+							<td>
+								fixed z-axis 4D rotation
+							</td>
+							<td class="desktop-shortcut" style="display: none;">
+								hold alt
+							</td>
+						</tr>
+						<tr class="desktop">
+							<td>
+								<input type="checkbox" id="4D-rot-toggle">
+							</td>
+							<td>
+								xw-plane and yw-plane rotation
+							</td>
+							<td class="desktop-shortcut" style="display: none;">
+								hold shift
+							</td>
+						</tr>
+						<tr class="desktop">
+							<td>
+								<input type="checkbox" id="light-move-toggle">
+							</td>
+							<td>
+								move light
+							</td>
+							<td class="desktop-shortcut" style="display: none;">
+								hold ctrl
+							</td>
+						</tr>
+						<tr class="">
+							<td>
+								<strong>Specularity:</strong>
+							</td>
+							<td>
+								<div class="slidercontainer">
+									<input type="range" min="0" max="200" value="50" class="slider" id="specular-slider">
+								</div>
+							</td>
+							<td class="desktop-shortcut" style="display: none;">
+								hold ctrl
+							</td>
+						</tr>
+						<tr class="desktop">
+							<td colspan="2">
+								<span>Press '<strong>h</strong>' to see desktop shortcut controls.</span>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+
+		<script src="js/jquery-v3.3.7.min.js"></script>
+		<script src="js/three.js"></script>
+		<script src="js/hammer.js"></script>
+		<script src="js/4Dtemplate.js"></script>
+	</body>
+</html>

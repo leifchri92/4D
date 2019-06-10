@@ -1,0 +1,89 @@
+.file-upload {
+	width: 100%;
+}
+
+.padding {
+	padding: 10px 10px 10px 10px;
+}
+
+.min225 {
+	min-width: 225px;
+}
+
+.canvas-control {
+	width: 100%;
+	height: 60px;
+	border-radius: 25px;
+	border-width: 2px;
+	border-color: white;
+	background-color: rgba(215, 215, 215, 0.4);
+	color: black;
+	font-size: 30px;
+}
+
+/*.min300 {
+	min-width: 700px;
+}*/
+
+.slider-title {
+	color: black;
+	font-size: 30px;	
+}
+
+.slidercontainer-mobile {
+	/*height: 60px;*/
+	padding: 5px;
+}
+
+.slider-mobile {
+	-webkit-appearance: none;
+    height: 40px;
+    border-radius: 10px;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+}
+
+.slider-mobile::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    background: rgba(44, 135, 240, 1.0);
+    cursor: pointer;
+}
+
+.slider-mobile::-moz-range-thumb {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    background: rgba(44, 135, 240, 1.0);
+    cursor: pointer;
+}
+
+#trail {
+	background-color: rgba(44, 135, 240, 1.0);
+	color: white;
+}
+
+table {
+	border-collapse: collapse;
+	width: 100%;
+}
+
+td, th, tr{
+	border: 1px solid #ddd;
+	padding: 8px;
+	/*font-size: 1.5vw;*/
+}
+
+tr:nth-child(even){
+	background-color: #f2f2f2;
+}
+
+/*#controls-table tr:nth-child(odd){
+	background-color: #f2f2f2;
+}*/
