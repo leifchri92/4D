@@ -3,7 +3,7 @@
  *
  * This file requires three.js, hammer.js
  *
- * author Leif Christiansen <leifchri@iu.edu>
+ * author Leif Christiansen <leifchristiansen92@gmail.com>
  */
 /*
     ToDo:
@@ -149,9 +149,6 @@ window.onload = function init() {
 
 	initEventHandlers();
 	window.addEventListener( 'resize', onWindowResize, false );
-
-    //showGeometryControls( "calabi-yau" );
-    addFermatSurfaceTo( g_objects, 7 );
 
 	render();
 }
