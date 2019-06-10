@@ -151,7 +151,7 @@ window.onload = function init() {
 	window.addEventListener( 'resize', onWindowResize, false );
 
     //showGeometryControls( "calabi-yau" );
-    //addFermatSurfaceTo( g_objects, 2 );
+    addFermatSurfaceTo( g_objects, 7 );
 
 	render();
 }
@@ -1381,7 +1381,6 @@ function makeNormalsModel( mesh ) {
     // else 
     vnh = new THREE.FaceNormalsHelper( mesh, 0.2, 0xffff00, 1 );
     vnh.name = "normals-"+mesh.name;
-    console.log(vnh);
     return vnh;
 }
 
@@ -1512,42 +1511,24 @@ function makeFermatSurfacePatch(n, k1, k2, ximax=1, xiN=7, thetaN=7) {
     var faces = [];
     var wireframeVertices = [];
 
-    //var ximax = 1;
-    var r, phi, z1Re, z2Re, z1Im, z2Im;
-    var p0, p1, p2, p3;
     var thetaMax = Math.PI/2;
     var thetaN = parseFloat(thetaN);
     var thetaStep = thetaMax/(thetaN-1);
-    var theta = 0;
     var xiN = parseFloat(xiN);
     var xiStep = (ximax*2)/(xiN-1);
-    var xi = -ximax;
-    var index=0;
-    for (var i=0; i<thetaN-1; i++) {
-        xi = -ximax;
-        for (var j=0; j<xiN-1; j++) {
-        	vertices4D.push( calcFermatSurfacePoint(theta,xi,n,k1,k2) );
-            vertices4D.push( calcFermatSurfacePoint(theta+thetaStep,xi,n,k1,k2) );
-            vertices4D.push( calcFermatSurfacePoint(theta+thetaStep,xi+xiStep,n,k1,k2) );
-            vertices4D.push( calcFermatSurfacePoint(theta,xi+xiStep,n,k1,k2) );
-
-			var f0 = new THREE.Face3( index+0, index+1, index+2 );
-	    	var f1 = new THREE.Face3( index+2, index+3, index+0 );
-			// var f2 = new THREE.Face3( index+0, index+2, index+1 );
-	  //   	var f3 = new THREE.Face3( index+2, index+0, index+3 );
-	    	faces.push( f0, f1 );
-
-	    	wireframeVertices.push(
-	    		vertices4D[index], vertices4D[index+1],
-	    		vertices4D[index+1], vertices4D[index+2],
-	    		vertices4D[index+2], vertices4D[index+3],
-	    		vertices4D[index+3], vertices4D[index]
-	    		);
-
-            xi += xiStep;
-            index += 4;
+    for (var theta=0; theta<=thetaMax; theta+=thetaStep) {
+        for (var xi=-ximax; xi<=ximax; xi+=xiStep) {
+            vertices4D.push( calcFermatSurfacePoint(theta,xi,n,k1,k2) );
         }
-        theta += thetaStep;
+    }
+
+    for (var i=0; i<thetaN-1; i++) {
+        for (var j=0; j<xiN-1; j++) {
+            var index = i*xiN+j;
+            var f0 = new THREE.Face3( index,             index+xiN, index+xiN+1 );            
+            var f1 = new THREE.Face3( index+xiN+1, index+1,   index );
+            faces.push( f0, f1 );
+        }
     }
 
     var c = 0.1;
