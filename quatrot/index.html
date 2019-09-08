@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Quaternion Rotation</title>
+	<script id="vertex-shader" type="x-shader/x-vertex">
+		precision mediump float;
+
+		attribute vec4 aNormal;
+		attribute vec4 aPosition;
+		attribute vec4 aColor;
+		
+		uniform mat4 uModelMatrix;
+		uniform mat4 uViewMatrix;
+		uniform mat4 uProjectionMatrix;
+
+		uniform	vec3 uCameraPosition;
+
+		varying vec3 vNormal;
+		varying vec3 vEye;
+		varying vec4 vColor;
+
+		void main()
+		{
+			gl_PointSize = 5.0;
+
+			mat4 MVMatrix = uViewMatrix * uModelMatrix;
+
+			gl_Position = uProjectionMatrix * MVMatrix * aPosition;
+
+			vEye = normalize( uCameraPosition - (MVMatrix * gl_Position).xyz );
+			vNormal = ( normalize(MVMatrix * vec4(aNormal.xyz, 0.0)) ).xyz;;
+
+			vColor = aColor;
+		}
+	</script>
+
+	<script id="fragment-shader" type="x-shader/x-fragment">
+		precision mediump float;
+
+		uniform	vec3 uLightPosition;
+
+		uniform bool uIsLit; 
+
+		varying vec3 vNormal;
+		varying vec3 vEye;
+		varying vec4 vColor;
+
+		void main()
+		{
+			vec3 L = normalize( uLightPosition.xyz );
+
+			float Kd = max(0.0, dot(vNormal, L));
+
+ 			vec3 H = normalize( L + vEye ); // Halfway vector between L and E
+    		vec4 specularColor = vec4(1.0, 1.0, 1.0, 1.0);
+    		float Ks = pow( max(dot(vNormal, H), 0.0), 500.0);
+
+    		if (uIsLit) {
+				gl_FragColor = vec4(0.2,0.2,0.2,1.0) * vColor + vColor * Kd + vec4(1.0,1.0,1.0,1.0) * 1.0 * Ks;
+			} else {
+				gl_FragColor = vColor;
+			}
+		}	
+	</script>
+
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	<link type="text/css" rel="stylesheet" href="quatrot.css">
+
+	<script type="text/javascript" src="./Common/webgl-utils.js"></script>
+	<script type="text/javascript" src="./Common/initShaders.js"></script>
+	<script type="text/javascript" src="./Common/MV.js"></script>
+	<script type="text/javascript" src="./Common/geometry.js"></script>
+	<script type="text/javascript" src="quatrot.js"></script>
+</head>
+
+<body onresize="canvasResize()">
+	<div class="container">
+		<h1>Quaternion Rotation</h1>
+	</div>
+	<div class="container">
+		<div class="row">
+			<div class=""  id="canvas-container">
+				<div class="padding">
+					<canvas id="gl-canvas" width="512" height="512">
+						Oops ... your browser doesn't support the HTML5 canvas element
+					</canvas>
+					<div id="mobile-controls" style="display:none;">
+						<button class="canvas-control" type="button" id="reset">Reset</button>
+						<button class="canvas-control" type="button" id="trail">Trail ON</button>
+						<button class="canvas-control" type="button" id="z-axis">Z-Axis OFF</button>
+						<!-- <button class="canvas-control" type="button" id="plus-speed">Speed +</button> -->
+						<!-- <button class="canvas-control" type="button" id="minus-speed">Speed -</button> -->
+						<div class="slidercontainer-mobile">
+							<SPAN class="slider-title">Trail Length</SPAN>
+							<input type="range" min="1" max="350" value="50" class="slider-mobile" id="trail-slider-mobile">
+						</div>
+						<div class="slidercontainer-mobile">
+							<SPAN class="slider-title">Rotation Speed</SPAN>
+							<input type="range" min="20" max="150" value="50" class="slider-mobile" id="rotation-slider-mobile">
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-xs-4" id="desktop-controls" style="display:none;">
+				<div class="padding">
+					<table id="keys-table">
+						<tr>
+							<td>
+								'<strong>t</strong>'
+							</td>
+							<td>
+								toggle comet trail
+							</td>
+						</tr>
+						<tr>
+							<td>
+								'<strong>a</strong>'
+							</td>
+							<td>
+								toggle world axes
+							</td>
+						</tr>
+						<tr>
+							<td>
+								'<strong>A</strong>'
+							</td>
+							<td>
+								toggle viewing frame axes
+							</td>
+						</tr>
+						<tr>
+							<td>
+								'<strong>i</strong>'
+							</td>
+							<td>
+								print out current quaternion
+							</td>
+						</tr>
+						<tr>
+							<td>
+								'<strong>r</strong>'
+							</td>
+							<td>
+								reset
+							</td>
+						</tr>
+						<tr>
+							<td>
+								'<strong>c</strong>'
+							</td>
+							<td>
+								clear keyframe/trail
+							</td>
+						</tr>
+						<tr>
+							<td>
+								hold alt
+							</td>
+							<td>
+								fixed z-axis rotation
+							</td>
+						</tr>
+					</table>
+				</div>
+				<hr>
+				<div class="padding">
+					<table id="controls-table">
+						<tr>
+							<td>
+								comet trail length
+							</td>
+							<td>
+								<div class="slidercontainer">
+									<input type="range" min="1" max="350" value="50" class="slider" id="trail-slider">
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								rotation speed
+							</td>
+							<td>
+								<div class="slidercontainer">
+									<input type="range" min="20" max="150" value="50" class="slider" id="rotation-slider">
+								</div>
+							</td>
+						</tr>
+					</table>
+				</div>
+				<div class="padding">
+					<span id="quaternion"></span>
+				</div>
+			</div>
+		</div>
+	</div>
+	<hr />
+	<div id="debug-label">
+		<div class="container">
+			<div class="row">
+				<div class="col-xs-12">
+					<div class="padding">
+						<!-- <span id="quaternion"></span> -->
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>4D Template</title>
+		<title>4D Explorer</title>
 		<meta charset="utf-8">
 
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
@@ -55,13 +55,13 @@
 			}
 		</style>
 
-		<link type="text/css" rel="stylesheet" href="styles/bootstrap-v3.3.7.min.css">
-		<link type="text/css" rel="stylesheet" href="styles/4Dtemplate.css">
+		<link type="text/css" rel="stylesheet" href="css/bootstrap-v3.3.7.min.css">
+		<link type="text/css" rel="stylesheet" href="css/4Dexplorer.css">
 	</head>
 
 	<body>
 		<div class="padding">
-			<h1>4D Template</h1>
+			<h1>4D Explorer</h1>
 		</div>
 
 		<div class="padding" id="webgl-container"></div>
@@ -69,6 +69,16 @@
 			<input type="radio" name="interaction-mode" value="three" checked="checked">&nbsp; 3D &nbsp;&nbsp;
 			<input type="radio" name="interaction-mode" value="xw-yw">&nbsp; XW/YW &nbsp;&nbsp;
 			<input type="radio" name="interaction-mode" value="fixed-z">&nbsp; ZW &nbsp;&nbsp;
+			<select id="calabi-yau-n-dropdown">
+				<option value="1">1</option>
+				<option value="2" selected="">2</option>
+				<option value="3">3</option>
+				<option value="4">4</option>
+				<option value="5">5</option>
+				<option value="6">6</option>
+				<option value="7">7</option>
+				<option value="8">8</option>
+			</select>
 			<button id="settings-btn" class="mobile-btn" style="cursor:pointer; float:right;">
 				Settings
 			</button>
@@ -136,17 +146,17 @@
 								</div>
 							</td>
 						</tr>
-						<tr id="calabi-yau-n-tr" hidden>
+						<tr id="calabi-yau-n-dropdown-tr">
 							<td>
 								<strong>N:</strong>
 							</td>
 							<td>
 								<select id="calabi-yau-n-dropdown">
 									<option value="1">1</option>
-									<option value="2" selected="">2</option>
+									<option value="2">2</option>
 									<option value="3">3</option>
 									<option value="4">4</option>
-									<option value="5">5</option>
+									<option value="5" selected="">5</option>
 									<option value="6">6</option>
 									<option value="7">7</option>
 									<option value="8">8</option>
@@ -284,7 +294,7 @@
 								toggle 4D orthographic/perspective
 							</td>
 							<td class="desktop-shortcut" style="display: none;">
-								'<strong>0</strong>'
+								'<strong>o</strong>'
 							</td>
 						</tr>
 						<tr>
@@ -306,7 +316,7 @@
 								fixed z-axis 4D rotation
 							</td>
 							<td class="desktop-shortcut" style="display: none;">
-								hold alt
+								hold shift
 							</td>
 						</tr>
 						<tr class="desktop">
@@ -317,7 +327,7 @@
 								xw-plane and yw-plane rotation
 							</td>
 							<td class="desktop-shortcut" style="display: none;">
-								hold shift
+								hold alt
 							</td>
 						</tr>
 						<tr class="desktop">
@@ -340,9 +350,6 @@
 									<input type="range" min="0" max="200" value="50" class="slider" id="specular-slider">
 								</div>
 							</td>
-							<td class="desktop-shortcut" style="display: none;">
-								hold ctrl
-							</td>
 						</tr>
 						<tr class="desktop">
 							<td colspan="2">
@@ -357,6 +364,6 @@
 		<script src="js/jquery-v3.3.7.min.js"></script>
 		<script src="js/three.js"></script>
 		<script src="js/hammer.js"></script>
-		<script src="js/4Dtemplate.js"></script>
+		<script src="js/4Dexplorer.js"></script>
 	</body>
 </html>

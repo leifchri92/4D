@@ -74,7 +74,7 @@ var g_projectionStart4D = "w"; // can't be an enum since it reads value off of s
 
 var g_doRenderWorldAxes = true;
 var g_doRender4DAxes = true;
-var g_smoothFlag = false;
+var g_smoothFlag = true;
 
 // Wrap the 4d model matrix in an object so that we update the scene when the matrix is changed
 function ModelMatrix4D() {
@@ -149,6 +149,8 @@ window.onload = function init() {
 
 	initEventHandlers();
 	window.addEventListener( 'resize', onWindowResize, false );
+
+    $("#geometry-dropdown").val("calabi-yau").trigger("change");
 
 	render();
 }
@@ -246,6 +248,16 @@ function render() {
 // Note: x and y input are normalized to [-1, 1]
 //#############################################################
 function initEventHandlers() {
+	 if ( isMobile() ) {
+        initMobileEventHandlers( g_container );
+
+        setupMobileUI();
+    } else {
+        $('.mobile').remove();
+        $('#webgl-container').addClass('col-xs-8');
+        $('#controls').addClass('col-xs-4');
+    }
+
     document.addEventListener( 'keydown', onKeyDown );
     
     document.getElementById('geometry-dropdown').onchange = handleGeometryDropdown;
@@ -341,17 +353,6 @@ function initEventHandlers() {
 
     render();
 
-
-    if ( isMobile() ) {
-        initMobileEventHandlers( g_container );
-
-        setupMobileUI();
-    } else {
-        $('.mobile').remove();
-        $('#webgl-container').addClass('col-xs-8');
-        $('#controls').addClass('col-xs-4');
-    }
-
     $('body').fadeIn();
     onWindowResize();
 }
@@ -412,7 +413,7 @@ function initMobileEventHandlers(canvas=null) {
     mc.get('pan').requireFailure( pinch );
 
     // add the gesture recognizers
-    mc.add( [ twopan, twopress, pinch, doubletap, tripletap, tap ] );
+    mc.add( [  twopress, pinch, doubletap, tripletap, tap ] );
 
     clear();
     log("It's hammertime");
@@ -568,7 +569,7 @@ function handleGeometryDropdown() {
        	var subSlider = document.getElementById('subdivisions-slider');
 	    addTorus4DTo( g_objects, parseFloat( subSlider.value ), false );
     } else if (this.value == "calabi-yau") {
-    	addFermatSurfaceTo( g_objects, 2 );
+    	addFermatSurfaceTo( g_objects, document.getElementById('calabi-yau-n-dropdown').value );
     } else if (this.value == "C5") {
         
     }
@@ -584,6 +585,8 @@ function showGeometryControls( model ) {
     $('#subdivisions-tr').hide()
     $('#calabi-yau-tr').hide();
     $('#calabi-yau-n-tr').hide();
+    $('#calabi-yau-n-dropdown').hide();
+    $('#calabi-yau-n-dropdown-tr').hide();
 
     if ( model == 'torus4D' ) {
     	$('#subdivisions-tr').show()
@@ -592,6 +595,8 @@ function showGeometryControls( model ) {
         $('#calabi-yau-xiN-tr').show();
         $('#calabi-yau-thetaN-tr').show();
         $('#calabi-yau-n-tr').show();
+        $('#calabi-yau-n-dropdown').show();
+        $('#calabi-yau-n-dropdown-tr').show();
 	}
 }
 
@@ -811,7 +816,7 @@ function onMouseWheel( ev ) {
 // Keyboard events
 
 function onKeyDown( ev ) {
-    if ( ev.key == '0' ) {
+    if ( ev.key == 'o' ) {
         toggle4DPerspective();
     } else if ( ev.key == 'R' ) {
         reset4DTransforms();
@@ -944,6 +949,7 @@ function toggleWorldAxes() {
 
 function toggle4DAxes() {
     g_axes4d.visible = !g_axes4d.visible;
+    document.getElementById("4D-axes-toggle").checked = g_axes4d.visible;
 
     render();
 }
@@ -1376,6 +1382,7 @@ function makeNormalsModel( mesh ) {
     var vnh;
     // if ( g_smoothFlag ) vnh = new THREE.VertexNormalsHelper( mesh, 0.2, 0xffff00 );
     // else 
+    // console.log(mesh);
     vnh = new THREE.FaceNormalsHelper( mesh, 0.2, 0xffff00, 1 );
     vnh.name = "normals-"+mesh.name;
     return vnh;
@@ -1492,7 +1499,7 @@ function makeAxes4D( l=1 ) {
 function addFermatSurfaceTo( group, n ) {
 	var ximax = document.getElementById('ximax-slider').value / 100.0;
     var xiN = document.getElementById('xiN-slider').value * 2 + 1;
-    var thetaN = document.getElementById('thetaN-slider').value;
+    var thetaN = document.getElementById('thetaN-slider').value * 1;
 
 	for (var k1=0; k1<n; k1++) {
         for (var k2=0; k2<n; k2++) { 
@@ -1513,8 +1520,9 @@ function makeFermatSurfacePatch(n, k1, k2, ximax=1, xiN=7, thetaN=7) {
     var thetaStep = thetaMax/(thetaN-1);
     var xiN = parseFloat(xiN);
     var xiStep = (ximax*2)/(xiN-1);
-    for (var theta=0; theta<=thetaMax; theta+=thetaStep) {
-        for (var xi=-ximax; xi<=ximax; xi+=xiStep) {
+    // add a little padding to avoid overshooting the max due to rounding error
+    for (var theta=0; theta<=(thetaMax+(thetaStep/2)); theta+=thetaStep) {
+        for (var xi=-ximax; xi<=(ximax+(xiStep/2)); xi+=xiStep) {
             vertices4D.push( calcFermatSurfacePoint(theta,xi,n,k1,k2) );
         }
     }
@@ -1522,9 +1530,14 @@ function makeFermatSurfacePatch(n, k1, k2, ximax=1, xiN=7, thetaN=7) {
     for (var i=0; i<thetaN-1; i++) {
         for (var j=0; j<xiN-1; j++) {
             var index = i*xiN+j;
-            var f0 = new THREE.Face3( index,             index+xiN, index+xiN+1 );            
+            var f0 = new THREE.Face3( index,       index+xiN, index+xiN+1 );            
             var f1 = new THREE.Face3( index+xiN+1, index+1,   index );
             faces.push( f0, f1 );
+
+            wireframeVertices.push( 
+	    		vertices4D[ f0.a ], vertices4D[ f0.b ],
+	    		vertices4D[ f0.b ], vertices4D[ f0.c ],
+    		);
         }
     }
 
