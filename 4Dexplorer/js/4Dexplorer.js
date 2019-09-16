@@ -167,7 +167,7 @@ function update4DModels() {
 	for ( let child of g_objects.children ) {
         if ( child.hasOwnProperty('geometry') ) {
 			if ( child.geometry.hasOwnProperty( 'vertices4D' ) ) {
-				console.log(child.name);
+				// console.log(child.name);
 				child.geometry.vertices = from4Dto3D( child.geometry.vertices4D, g_modelMatrix4D.m.elements );
                 child.geometry.verticesNeedUpdate = true;
 	            child.geometry.elementsNeedUpdate = true;
@@ -183,7 +183,6 @@ function update4DModels() {
 		                vnh.setRotationFromMatrix( g_sceneRotation );
 	            	}
 	            }
-
 			}
 		}
 	}
@@ -195,6 +194,41 @@ function update4DModels() {
 	g_projection4DMode = tmp;
 
 	render();
+}
+
+// Compute largest dimension and scale objects in scene to fit viewing window.
+function scaleToFitWindow() {
+    var max = new THREE.Vector3(0, 0, 0);
+    var min = new THREE.Vector3(0, 0, 0);
+    for ( let child of g_objects.children ) {
+        child.geometry.computeBoundingBox();
+        var box = child.geometry.boundingBox;
+        if (box.max.x > max.x) max.x = box.max.x;
+        if (box.max.y > max.x) max.y = box.max.y;
+        if (box.max.z > max.z) max.z = box.max.z;
+        if (box.min.x < min.x) min.x = box.min.x;
+        if (box.min.y < min.x) min.y = box.min.y;
+        if (box.min.z < min.z) min.z = box.min.z;
+    }
+
+    var x_scale = Math.abs(max.x) + Math.abs(min.x);
+    var y_scale = Math.abs(max.y) + Math.abs(min.y);
+    var z_scale = Math.abs(max.z) + Math.abs(min.z);
+    var scale = 2/Math.max(x_scale, y_scale, z_scale);
+
+    for ( let child of g_objects.children ) {
+        child.geometry.scale(scale, scale, scale);
+         child.geometry.computeBoundingBox();
+            var box = child.geometry.boundingBox;
+            if (box.max.x > max.x) max.x = box.max.x;
+            if (box.max.y > max.x) max.y = box.max.y;
+            if (box.max.z > max.z) max.z = box.max.z;
+            if (box.min.x < min.x) min.x = box.min.x;
+            if (box.min.y < min.x) min.y = box.min.y;
+            if (box.min.z < min.z) min.z = box.min.z;
+    }
+
+    render();
 }
 
 // Applies animated rotation using g_dXMomentum, g_dYMomentum, and g_animateRotateMode
@@ -864,13 +898,20 @@ function toggle4DPerspective() {
         g_projection4DMode = Projection4DEnum.perspective;
     }
     update4DModels();
+    // scaleToFitWindow();
 }
 
 function reset4DTransforms() {
-    g_modelMatrix4D.m.elements = g_identityMatArray.slice();
+    set4DTransforms(g_identityMatArray);
+}
+
+// Set the 4D transform matrix for the scene. Input is an array representing a 
+// 4D matrix in column-major order. 
+function set4DTransforms(mat4Array) {
+    g_modelMatrix4D.m.elements = mat4.slice();
     update4DModels();
 
-    render();
+    render();   
 }
 
 function reset3DTransforms() {
