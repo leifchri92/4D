@@ -23,6 +23,7 @@
 var g_container;
 var g_camera, g_scene, g_renderer, g_scene2;
 var g_light; // reference to light
+var g_lightHelper; // visualizing of light, shown when moving light
 var g_specular = 100;
 var g_axes4d; // reference to 4D axes Object
 var g_objects = new THREE.Group(); // group that will hold all other objects in our scene
@@ -41,6 +42,7 @@ var g_identityMatArray = [
                     0.0, 0.0, 0.0, 1.0 ]; 
 var g_identityMat = new THREE.Matrix4();
 var g_sceneRotation = new THREE.Matrix4();
+var g_forward = new THREE.Vector3( 0, 0, 1 );
 
 //-------------------------------------------------------------
 // Input Controls
@@ -113,9 +115,12 @@ window.onload = function init() {
 	var ambientLight = new THREE.AmbientLight( 0xcccccc, 0.4 );
 	g_scene.add(ambientLight);
 
-	g_light = new THREE.PointLight( 0xffffff, 1, 100 );
-	g_light.position.set( 2, 2, 5 );
-	g_scene.add( g_light );
+    g_light = new THREE.DirectionalLight( 0xffffff, 0.8 );
+    g_light.position.set( 1, 1, 2 );
+    g_scene.add( g_light );
+
+    g_lightHelper = new THREE.DirectionalLightHelper( g_light, 0.25 );
+	g_scene.add( g_lightHelper );
 
 	// camera
 
@@ -248,6 +253,9 @@ function animate() {
         g_sceneRotation.premultiply( rollingBall( -g_dXMomentum, g_dYMomentum ) );
 		g_objects.setRotationFromMatrix( g_sceneRotation );
 		g_axes4d.setRotationFromMatrix( g_sceneRotation );
+    } else if (g_animateRotateMode == RotationEnum.lCtrl) {
+        let rotation = new THREE.Matrix4().makeRotationAxis( g_forward, -g_dXMomentum*0.01 );
+        g_sceneRotation.premultiply( rotation );
     }
 
     render();
@@ -384,7 +392,8 @@ function initEventHandlers() {
         document.getElementById("4D-rot-toggle").checked = false;
         g_ctrlFlag = !g_ctrlFlag;
         // If true, stop flag from being reset 
-        g_ctrlFlagLock = g_ctrlFlagLock;
+        g_ctrlFlagLock = g_ctrlFlag;
+        g_lightHelper.visible = g_ctrlFlag;
     }
 
     $('input[name=projection-start]').change(function () {
@@ -729,12 +738,18 @@ function onInputMove( x, y ) {
 		} else if ( g_altFlag ) {
             g_modelMatrix4D.premultiply( makeRot4d( xDelta, yDelta, 0 ));
             g_animateRotateMode = RotationEnum.alt;
-        } else if (g_ctrlFlag ) {
+        } else if ( g_ctrlFlag ) {
+            var lightScale = 0.05;
             var pos = g_light.position;
-            pos.x += -xDelta;
-            pos.y += yDelta;
+            pos.x += -(xDelta*lightScale);
+            pos.y += (yDelta*lightScale);
             g_light.position = pos;
             g_animateRotateMode = RotationEnum.ctrl;
+            g_lightHelper.visible = true;
+            g_lightHelper.update();
+        } else if ( g_lCtrlFlag ) {
+            let rotation = new THREE.Matrix4().makeRotationAxis( g_forward, -g_dXMomentum*0.01 );
+            g_sceneRotation.premultiply( rotation );
         } else {
 			g_sceneRotation.premultiply( rollingBall( -xDelta, yDelta ) );
 			g_objects.setRotationFromMatrix( g_sceneRotation );
@@ -756,6 +771,7 @@ function onInputMove( x, y ) {
 
 function onInputEnd() {
 	g_inputFlag = false;
+    if ( !g_ctrlFlagLock ) g_lightHelper.visible = false;
 
 	render();
 
