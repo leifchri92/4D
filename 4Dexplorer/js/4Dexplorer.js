@@ -120,6 +120,7 @@ window.onload = function init() {
     g_scene.add( g_light );
 
     g_lightHelper = new THREE.DirectionalLightHelper( g_light, 0.25 );
+    g_lightHelper.visible = false;
 	g_scene.add( g_lightHelper );
 
 	// camera
@@ -253,9 +254,9 @@ function animate() {
         g_sceneRotation.premultiply( rollingBall( -g_dXMomentum, g_dYMomentum ) );
 		g_objects.setRotationFromMatrix( g_sceneRotation );
 		g_axes4d.setRotationFromMatrix( g_sceneRotation );
-    } else if (g_animateRotateMode == RotationEnum.lCtrl) {
-        let rotation = new THREE.Matrix4().makeRotationAxis( g_forward, -g_dXMomentum*0.01 );
-        g_sceneRotation.premultiply( rotation );
+    // } else if (g_animateRotateMode == RotationEnum.lCtrl) {
+    //     let rotation = new THREE.Matrix4().makeRotationAxis( g_forward, -g_dXMomentum*0.01 );
+    //     g_sceneRotation.premultiply( rotation );
     }
 
     render();
@@ -747,9 +748,9 @@ function onInputMove( x, y ) {
             g_animateRotateMode = RotationEnum.ctrl;
             g_lightHelper.visible = true;
             g_lightHelper.update();
-        } else if ( g_lCtrlFlag ) {
-            let rotation = new THREE.Matrix4().makeRotationAxis( g_forward, -g_dXMomentum*0.01 );
-            g_sceneRotation.premultiply( rotation );
+        // } else if ( g_lCtrlFlag ) {
+        //     let rotation = new THREE.Matrix4().makeRotationAxis( g_forward, -g_dXMomentum*0.01 );
+        //     g_sceneRotation.premultiply( rotation );
         } else {
 			g_sceneRotation.premultiply( rollingBall( -xDelta, yDelta ) );
 			g_objects.setRotationFromMatrix( g_sceneRotation );
