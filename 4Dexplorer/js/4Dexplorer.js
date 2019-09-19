@@ -55,6 +55,7 @@ var g_altFlagLock = false;
 var g_altFlag = false;
 var g_ctrlFlagLock = false;
 var g_ctrlFlag = false;
+var g_lightFlag = false;
 var g_inputLock = false; // stop listening for key events when modal overlay is shown
 
 var InteractionEnum = Object.freeze({"translate":0, "rotate":1});
@@ -392,16 +393,7 @@ function initEventHandlers() {
         g_ctrlFlag = false;
         document.getElementById("light-move-toggle").checked = false;
     }
-    document.getElementById("light-move-toggle").onchange = function() {
-        g_shiftFlag = false;
-        document.getElementById("z-4D-rot-toggle").checked = false;
-        g_altFlag = false;
-        document.getElementById("4D-rot-toggle").checked = false;
-        g_ctrlFlag = !g_ctrlFlag;
-        // If true, stop flag from being reset 
-        g_ctrlFlagLock = g_ctrlFlag;
-        g_lightHelper.visible = g_ctrlFlag;
-    }
+    document.getElementById("light-move-toggle").onchange = toggleLightControl;
 
     $('input[name=projection-start]').change(function () {
         g_projectionStart4D = $('input[name=projection-start]:checked').val();
@@ -746,6 +738,7 @@ function onInputMove( x, y ) {
             g_modelMatrix4D.premultiply( makeRot4d( xDelta, yDelta, 0 ));
             g_animateRotateMode = RotationEnum.alt;
         } else if ( g_ctrlFlag ) {
+        } else if ( g_lightFlag ) {
             var lightScale = 0.05;
             var pos = g_light.position;
             pos.x += -(xDelta*lightScale);
@@ -778,7 +771,7 @@ function onInputMove( x, y ) {
 
 function onInputEnd() {
 	g_inputFlag = false;
-    if ( !g_ctrlFlagLock ) g_lightHelper.visible = false;
+    if ( !g_lightFlag ) g_lightHelper.visible = false;
 
 	render();
 
@@ -911,6 +904,8 @@ function onKeyDown( ev ) {
         }
     } else if ( ev.key == 'e' ) {
     	toggleEdges();
+    } else if ( ev.key == 'l' ) {
+        toggleLightControl();
     }
 
     render();
@@ -1033,6 +1028,18 @@ function toggle4DAxes() {
     document.getElementById("4D-axes-toggle").checked = g_axes4d.visible;
 
     render();
+}
+
+function toggleLightControl() {
+    g_shiftFlag = false;
+    document.getElementById("z-4D-rot-toggle").checked = false;
+    g_altFlag = false;
+    document.getElementById("4D-rot-toggle").checked = false;
+    g_lightFlag = !g_lightFlag;
+    // g_ctrlFlag = !g_ctrlFlag;
+    // If true, stop flag from being reset 
+    // g_ctrlFlagLock = g_ctrlFlag;
+    g_lightHelper.visible = g_lightFlag;
 }
 
 //#############################################################
