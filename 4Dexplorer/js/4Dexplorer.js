@@ -55,6 +55,7 @@ var g_altFlagLock = false;
 var g_altFlag = false;
 var g_ctrlFlagLock = false;
 var g_ctrlFlag = false;
+var g_inputLock = false; // stop listening for key events when modal overlay is shown
 
 var InteractionEnum = Object.freeze({"translate":0, "rotate":1});
 var g_interactionMode = InteractionEnum.translate; 
@@ -198,6 +199,8 @@ function update4DModels() {
 	g_axes4d.geometry.vertices = from4Dto3D( g_axes4d.geometry.vertices4D, g_modelMatrix4D.m.elements );
 	g_axes4d.geometry.verticesNeedUpdate = true;
 	g_projection4DMode = tmp;
+
+    // scaleToFitWindow();
 
 	render();
 }
@@ -347,7 +350,10 @@ function initEventHandlers() {
 
     document.getElementById("reset-4D-button").onclick = reset4DTransforms;
     document.getElementById("reset-3D-button").onclick = reset3DTransforms;
-    
+    document.getElementById("enter-4D-button").onclick = function () { g_inputLock = true; }
+    document.getElementById("enter-4D-close").onclick = function () { g_inputLock = false; }
+    document.getElementById("custom-4D-enter").onclick = enterCustom4DRotation;
+
     document.getElementById("frame-axes-toggle").onchange = toggleWorldAxes;
     document.getElementById("frame-axes-toggle").checked = g_doRenderWorldAxes;
     
@@ -876,6 +882,8 @@ function onMouseWheel( ev ) {
 // Keyboard events
 
 function onKeyDown( ev ) {
+    if (g_inputLock) return;
+
     if ( ev.key == 'o' ) {
         toggle4DPerspective();
     } else if ( ev.key == 'R' ) {
@@ -915,17 +923,23 @@ function toggle4DPerspective() {
         g_projection4DMode = Projection4DEnum.perspective;
     }
     update4DModels();
-    // scaleToFitWindow();
 }
 
 function reset4DTransforms() {
     set4DTransforms(g_identityMatArray);
 }
 
+function enterCustom4DRotation() {
+    var mat4DText = document.getElementById("custom-4-textarea").value;
+    var elements = mat4DText.split(",");
+    elements = elements.map(function (str) {return parseFloat(str)})
+    set4DTransforms(elements);
+}
+
 // Set the 4D transform matrix for the scene. Input is an array representing a 
 // 4D matrix in column-major order. 
 function set4DTransforms(mat4Array) {
-    g_modelMatrix4D.m.elements = mat4.slice();
+    g_modelMatrix4D.m.elements = mat4Array.slice();
     update4DModels();
 
     render();   

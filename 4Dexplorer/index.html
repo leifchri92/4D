@@ -221,6 +221,11 @@
 							</td>
 						</tr>
 						<tr>
+							<td colspan="2">
+								<button id="enter-4D-button" data-toggle="modal" data-target="#custom-4D-modal">Enter 4D rotation</button>
+							</td>
+						</tr>
+						<tr>
 							<td>
 								<input type="checkbox" id="frame-axes-toggle">
 							</td>
@@ -361,7 +366,27 @@
 			</div>
 		</div>
 
+		<div class="modal fade" id="custom-4D-modal" tabindex="-1" role="dialog" aria-labelledby="custom-4D-modal" aria-hidden="true">
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button id="enter-4D-close" type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+		        <h4 class="modal-title" id="myModalLabel">4D Rotation</h4>
+		      </div>
+		      <div class="modal-body">
+		        <span>Enter a custom 4D rotation below as a matrix in column-major order with elements seperated by commas.</span>
+		        <textarea class="form-control" id="custom-4-textarea" rows="3"></textarea>
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" id="custom-4D-enter">Enter</button>
+		        <!-- <button type="button" data-dismiss="modal">Close</button> -->
+		      </div>
+		    </div>
+		  </div>
+		</div>
+
 		<script src="js/jquery-v3.3.7.min.js"></script>
+		<script src="js/bootstrap-v3.3.7.min.js"></script>
 		<script src="js/three.js"></script>
 		<script src="js/hammer.js"></script>
 		<script src="js/4Dexplorer.js"></script>
